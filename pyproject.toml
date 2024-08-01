@@ -1,0 +1,18 @@
+[project]
+name = "QCNN-Brain-Tumors"
+version = "2024.06.31"
+
+authors =[
+    {name = "Michelle L. Wu"}, 
+    {name = "Melvin Lin"}, 
+]
+
+description = "Independent Research Project"
+
+dependencies = [
+    "numpy", 
+    "h5py", 
+    "scikit-learn", 
+    "tensorflow", 
+    "matplotlib", 
+]
