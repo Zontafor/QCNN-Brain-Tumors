@@ -3,3 +3,4 @@ h5py
 scikit-learn
 tensorflow
 matplotlib
+black

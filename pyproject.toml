@@ -15,4 +15,5 @@ dependencies = [
     "scikit-learn", 
     "tensorflow", 
     "matplotlib", 
+    "black"
 ]
