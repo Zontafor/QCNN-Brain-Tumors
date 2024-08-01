@@ -16,5 +16,6 @@ dependencies = [
     "tensorflow", 
     "matplotlib", 
     "black", 
-    "pennylane"
+    "pennylane", 
+    "tensorflow"
 ]
