@@ -11,68 +11,68 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.callbacks import EarlyStopping
 
-# Create tumor, edema, and necrotic masks
-# Create a list of all .h5 files in the directory
-h5_files = [f for f in os.listdir(directory) if f.endswith(".h5")]
-print(f"Found {len(h5_files)} .h5 files:\nExample file names:{h5_files[:3]}")
+# # Create tumor, edema, and necrotic masks
+# # Create a list of all .h5 files in the directory
+# h5_files = [f for f in os.listdir(directory) if f.endswith(".h5")]
+# print(f"Found {len(h5_files)} .h5 files:\nExample file names:{h5_files[:3]}")
 
-# Open the first .h5 file in the list to inspect its contents
-if h5_files:
-    file_path = os.path.join(directory, h5_files[25070])
-    with h5py.File(file_path, "r") as file:
-        print("\nKeys for each file:", list(file.keys()))
-        for key in file.keys():
-            print(f"\nData type of {key}:", type(file[key][()]))
-            print(f"Shape of {key}:", file[key].shape)
-            print(f"Array dtype: {file[key].dtype}")
-            print(f"Array max val: {np.max(file[key])}")
-            print(f"Array min val: {np.min(file[key])}")
-else:
-    print("No .h5 files found in the directory.")
-
-
-# Pre-processing with SVD (dimensionality reduction)
-# Function to load images
-def load_images(data_dir, batch_size=64):
-    images = []
-    total_images_loaded = 0
-    for patient_folder in os.listdir(data_dir):
-        patient_path = os.path.join(data_dir, patient_folder)
-        if os.path.isdir(patient_path):
-            for file in glob.glob(os.path.join(patient_path, "*.h5")):
-                try:
-                    with h5py.File(file, "r") as f:
-                        image_data = f["image"][()]
-                        images.append(image_data)
-                        total_images_loaded += 1
-                        if len(images) >= batch_size:
-                            yield np.array(images, dtype=np.float32)
-                            images = []
-                except Exception as e:
-                    print(f"Error loading image: {file} - {e}")
-    if images:
-        yield np.array(images, dtype=np.float32)
-    print(f"Total images loaded: {total_images_loaded}")
+# # Open the first .h5 file in the list to inspect its contents
+# if h5_files:
+#     file_path = os.path.join(directory, h5_files[25070])
+#     with h5py.File(file_path, "r") as file:
+#         print("\nKeys for each file:", list(file.keys()))
+#         for key in file.keys():
+#             print(f"\nData type of {key}:", type(file[key][()]))
+#             print(f"Shape of {key}:", file[key].shape)
+#             print(f"Array dtype: {file[key].dtype}")
+#             print(f"Array max val: {np.max(file[key])}")
+#             print(f"Array min val: {np.min(file[key])}")
+# else:
+#     print("No .h5 files found in the directory.")
 
 
-data_dir = r"C:\Users\Michelle Wu\OneDrive\Desktop\UCR\MATH\MATH194\BraTS2020 Data\archive\BraTS2020_training_data\content"
-output_dir = (
-    r"C:\Users\Michelle Wu\OneDrive\Desktop\UCR\MATH\MATH194\Code Outputs"
-)
+# # Pre-processing with SVD (dimensionality reduction)
+# # Function to load images
+# def load_images(data_dir, batch_size=64):
+#     images = []
+#     total_images_loaded = 0
+#     for patient_folder in os.listdir(data_dir):
+#         patient_path = os.path.join(data_dir, patient_folder)
+#         if os.path.isdir(patient_path):
+#             for file in glob.glob(os.path.join(patient_path, "*.h5")):
+#                 try:
+#                     with h5py.File(file, "r") as f:
+#                         image_data = f["image"][()]
+#                         images.append(image_data)
+#                         total_images_loaded += 1
+#                         if len(images) >= batch_size:
+#                             yield np.array(images, dtype=np.float32)
+#                             images = []
+#                 except Exception as e:
+#                     print(f"Error loading image: {file} - {e}")
+#     if images:
+#         yield np.array(images, dtype=np.float32)
+#     print(f"Total images loaded: {total_images_loaded}")
 
-if not os.path.exists(data_dir):
-    print(
-        f"The directory {data_dir} does not exist. Please provide the correct path."
-    )
-    sys.exit()
 
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+# data_dir = r"C:\Users\Michelle Wu\OneDrive\Desktop\UCR\MATH\MATH194\BraTS2020 Data\archive\BraTS2020_training_data\content"
+# output_dir = (
+#     r"C:\Users\Michelle Wu\OneDrive\Desktop\UCR\MATH\MATH194\Code Outputs"
+# )
 
-# Calculate the total number of images
-total_images_loaded = sum(
-    [len(files) for r, d, files in os.walk(data_dir) if files]
-)
+# if not os.path.exists(data_dir):
+#     print(
+#         f"The directory {data_dir} does not exist. Please provide the correct path."
+#     )
+#     sys.exit()
+
+# if not os.path.exists(output_dir):
+#     os.makedirs(output_dir)
+
+# # Calculate the total number of images
+# total_images_loaded = sum(
+#     [len(files) for r, d, files in os.walk(data_dir) if files]
+# )
 
 # Define parameters
 num_components = 95
