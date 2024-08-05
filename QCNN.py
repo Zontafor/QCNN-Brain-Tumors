@@ -4,11 +4,29 @@ from svd import SVD
 from tensorflow.keras import layers, models
 from tensorflow.keras.callbacks import EarlyStopping
 
+n_qubits = 4
+device = qml.device("default.qubit", wires=n_qubits)
 
-class QCNN:
 
-    def __init__(self, total_images: int, num_components: int, n_qubits: int):
-        self.total_images = total_images
-        self.num_components = num_components
-        self.n_qubits = 4
-        self.device = qml.device("default.qubit", wires=n_qubits)
+@qml.qnode(device)
+def quantum_circuit(inputs, weights):
+    qml.templates.AmplitudeEmbedding(
+        inputs, wires=range(n_qubits), normalize=True
+    )
+    for i in range(n_qubits):
+        qml.RX(weights[i], wires=i)
+    return [qml.expval(qml.PauliZ(i)) for i in range(n_qubits)]
+
+
+
+def main():
+    input = "BraTS2020_training_data/content"
+    output = "Outputs"
+
+    svd = SVD(input, output, 64, 95)
+    svd.svd()
+    X_train, X_test, y_train, y_test = svd.get_dataset()
+
+
+if __name__ == "__main__":
+    main()
