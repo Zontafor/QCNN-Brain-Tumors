@@ -2,4 +2,7 @@
 .venv/
 BraTS2020_training_data/
 *.csv
+,vscode/
+__pycache__/
+*.egg_info/
 
