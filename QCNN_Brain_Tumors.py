@@ -11,198 +11,198 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.callbacks import EarlyStopping
 
-# # Create tumor, edema, and necrotic masks
-# # Create a list of all .h5 files in the directory
-# h5_files = [f for f in os.listdir(directory) if f.endswith(".h5")]
-# print(f"Found {len(h5_files)} .h5 files:\nExample file names:{h5_files[:3]}")
+# Create tumor, edema, and necrotic masks
+# Create a list of all .h5 files in the directory
+h5_files = [f for f in os.listdir(directory) if f.endswith(".h5")]
+print(f"Found {len(h5_files)} .h5 files:\nExample file names:{h5_files[:3]}")
 
-# # Open the first .h5 file in the list to inspect its contents
-# if h5_files:
-#     file_path = os.path.join(directory, h5_files[25070])
-#     with h5py.File(file_path, "r") as file:
-#         print("\nKeys for each file:", list(file.keys()))
-#         for key in file.keys():
-#             print(f"\nData type of {key}:", type(file[key][()]))
-#             print(f"Shape of {key}:", file[key].shape)
-#             print(f"Array dtype: {file[key].dtype}")
-#             print(f"Array max val: {np.max(file[key])}")
-#             print(f"Array min val: {np.min(file[key])}")
-# else:
-#     print("No .h5 files found in the directory.")
-
-
-# # Pre-processing with SVD (dimensionality reduction)
-# # Function to load images
-# def load_images(data_dir, batch_size=64):
-#     images = []
-#     total_images_loaded = 0
-#     for patient_folder in os.listdir(data_dir):
-#         patient_path = os.path.join(data_dir, patient_folder)
-#         if os.path.isdir(patient_path):
-#             for file in glob.glob(os.path.join(patient_path, "*.h5")):
-#                 try:
-#                     with h5py.File(file, "r") as f:
-#                         image_data = f["image"][()]
-#                         images.append(image_data)
-#                         total_images_loaded += 1
-#                         if len(images) >= batch_size:
-#                             yield np.array(images, dtype=np.float32)
-#                             images = []
-#                 except Exception as e:
-#                     print(f"Error loading image: {file} - {e}")
-#     if images:
-#         yield np.array(images, dtype=np.float32)
-#     print(f"Total images loaded: {total_images_loaded}")
+# Open the first .h5 file in the list to inspect its contents
+if h5_files:
+    file_path = os.path.join(directory, h5_files[25070])
+    with h5py.File(file_path, "r") as file:
+        print("\nKeys for each file:", list(file.keys()))
+        for key in file.keys():
+            print(f"\nData type of {key}:", type(file[key][()]))
+            print(f"Shape of {key}:", file[key].shape)
+            print(f"Array dtype: {file[key].dtype}")
+            print(f"Array max val: {np.max(file[key])}")
+            print(f"Array min val: {np.min(file[key])}")
+else:
+    print("No .h5 files found in the directory.")
 
 
-# data_dir = r"C:\Users\Michelle Wu\OneDrive\Desktop\UCR\MATH\MATH194\BraTS2020 Data\archive\BraTS2020_training_data\content"
-# output_dir = (
-#     r"C:\Users\Michelle Wu\OneDrive\Desktop\UCR\MATH\MATH194\Code Outputs"
-# )
+# Pre-processing with SVD (dimensionality reduction)
+# Function to load images
+def load_images(data_dir, batch_size=64):
+    images = []
+    total_images_loaded = 0
+    for patient_folder in os.listdir(data_dir):
+        patient_path = os.path.join(data_dir, patient_folder)
+        if os.path.isdir(patient_path):
+            for file in glob.glob(os.path.join(patient_path, "*.h5")):
+                try:
+                    with h5py.File(file, "r") as f:
+                        image_data = f["image"][()]
+                        images.append(image_data)
+                        total_images_loaded += 1
+                        if len(images) >= batch_size:
+                            yield np.array(images, dtype=np.float32)
+                            images = []
+                except Exception as e:
+                    print(f"Error loading image: {file} - {e}")
+    if images:
+        yield np.array(images, dtype=np.float32)
+    print(f"Total images loaded: {total_images_loaded}")
 
-# if not os.path.exists(data_dir):
-#     print(
-#         f"The directory {data_dir} does not exist. Please provide the correct path."
-#     )
-#     sys.exit()
 
-# if not os.path.exists(output_dir):
-#     os.makedirs(output_dir)
+data_dir = r"C:\Users\Michelle Wu\OneDrive\Desktop\UCR\MATH\MATH194\BraTS2020 Data\archive\BraTS2020_training_data\content"
+output_dir = (
+    r"C:\Users\Michelle Wu\OneDrive\Desktop\UCR\MATH\MATH194\Code Outputs"
+)
 
-# # Calculate the total number of images
-# total_images_loaded = sum(
-#     [len(files) for r, d, files in os.walk(data_dir) if files]
-# )
+if not os.path.exists(data_dir):
+    print(
+        f"The directory {data_dir} does not exist. Please provide the correct path."
+    )
+    sys.exit()
 
-# # Define parameters
-# num_components = 95
-# batch_size = 64
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
-# index = 0
-# batch_index = 0
+# Calculate the total number of images
+total_images_loaded = sum(
+    [len(files) for r, d, files in os.walk(data_dir) if files]
+)
 
-# svd_transformers = []
+# Define parameters
+num_components = 95
+batch_size = 64
 
-# for batch in load_images(data_dir, batch_size):
-#     # Flatten the batch of images
-#     X_batch = batch.reshape(batch.shape[0], -1)
-#     print(f"Original shape of X_batch: {X_batch.shape}")
+index = 0
+batch_index = 0
 
-#     # Apply SVD to the batch
-#     current_num_components = min(num_components, X_batch.shape[1])
-#     svd = TruncatedSVD(n_components=current_num_components)
-#     X_reduced_batch = svd.fit_transform(X_batch)
-#     print(f"Reduced shape of X_batch: {X_reduced_batch.shape}")
+svd_transformers = []
 
-#     svd_transformers.append(svd)
+for batch in load_images(data_dir, batch_size):
+    # Flatten the batch of images
+    X_batch = batch.reshape(batch.shape[0], -1)
+    print(f"Original shape of X_batch: {X_batch.shape}")
 
-#     # Simulate label data for demonstration purposes
-#     y_batch = np.random.randint(4, size=batch.shape[0])
-#     y_batch = tf.keras.utils.to_categorical(y_batch, 4)
+    # Apply SVD to the batch
+    current_num_components = min(num_components, X_batch.shape[1])
+    svd = TruncatedSVD(n_components=current_num_components)
+    X_reduced_batch = svd.fit_transform(X_batch)
+    print(f"Reduced shape of X_batch: {X_reduced_batch.shape}")
 
-#     # Save the reduced data and labels to disk as intermediate files
-#     batch_file_X = os.path.join(
-#         output_dir, f"X_reduced_batch_{batch_index}.npy"
-#     )
-#     batch_file_y = os.path.join(output_dir, f"y_batch_{batch_index}.npy")
+    svd_transformers.append(svd)
 
-#     np.save(batch_file_X, X_reduced_batch)
-#     np.save(batch_file_y, y_batch)
+    # Simulate label data for demonstration purposes
+    y_batch = np.random.randint(4, size=batch.shape[0])
+    y_batch = tf.keras.utils.to_categorical(y_batch, 4)
 
-#     print(f"Saved batch {batch_index} to disk.")
-#     batch_index += 1
+    # Save the reduced data and labels to disk as intermediate files
+    batch_file_X = os.path.join(
+        output_dir, f"X_reduced_batch_{batch_index}.npy"
+    )
+    batch_file_y = os.path.join(output_dir, f"y_batch_{batch_index}.npy")
 
-# # Combine the intermediate files into memory-mapped arrays
-# X_reduced_mmap = np.memmap(
-#     "X_reduced.dat",
-#     dtype=np.float32,
-#     mode="w+",
-#     shape=(total_images_loaded, num_components),
-# )
-# y_mmap = np.memmap(
-#     "y.dat", dtype=np.float32, mode="w+", shape=(total_images_loaded, 4)
-# )
+    np.save(batch_file_X, X_reduced_batch)
+    np.save(batch_file_y, y_batch)
 
-# index = 0
-# for batch_index in range(batch_index):
-#     batch_file_X = os.path.join(
-#         output_dir, f"X_reduced_batch_{batch_index}.npy"
-#     )
-#     batch_file_y = os.path.join(output_dir, f"y_batch_{batch_index}.npy")
+    print(f"Saved batch {batch_index} to disk.")
+    batch_index += 1
 
-#     X_reduced_batch = np.load(batch_file_X)
-#     y_batch = np.load(batch_file_y)
+# Combine the intermediate files into memory-mapped arrays
+X_reduced_mmap = np.memmap(
+    "X_reduced.dat",
+    dtype=np.float32,
+    mode="w+",
+    shape=(total_images_loaded, num_components),
+)
+y_mmap = np.memmap(
+    "y.dat", dtype=np.float32, mode="w+", shape=(total_images_loaded, 4)
+)
 
-#     current_batch_size = X_reduced_batch.shape[0]
+index = 0
+for batch_index in range(batch_index):
+    batch_file_X = os.path.join(
+        output_dir, f"X_reduced_batch_{batch_index}.npy"
+    )
+    batch_file_y = os.path.join(output_dir, f"y_batch_{batch_index}.npy")
 
-#     # Check if shapes match before saving to memory-mapped arrays
-#     try:
-#         X_reduced_mmap[
-#             index : index + current_batch_size, : X_reduced_batch.shape[1]
-#         ] = X_reduced_batch
-#         y_mmap[index : index + current_batch_size] = y_batch
-#         index += current_batch_size
-#         print(f"Loaded batch {batch_index} from disk.")
-#     except ValueError as e:
-#         print(f"Error saving batch {batch_index}: {e}")
-#         continue
+    X_reduced_batch = np.load(batch_file_X)
+    y_batch = np.load(batch_file_y)
 
-# # Ensure all data is written to disk
-# X_reduced_mmap.flush()
-# y_mmap.flush()
+    current_batch_size = X_reduced_batch.shape[0]
 
-# # Save the SVD transformers for future use
-# with open("svd_transformers.pkl", "wb") as f:
-#     pickle.dump(svd_transformers, f)
+    # Check if shapes match before saving to memory-mapped arrays
+    try:
+        X_reduced_mmap[
+            index : index + current_batch_size, : X_reduced_batch.shape[1]
+        ] = X_reduced_batch
+        y_mmap[index : index + current_batch_size] = y_batch
+        index += current_batch_size
+        print(f"Loaded batch {batch_index} from disk.")
+    except ValueError as e:
+        print(f"Error saving batch {batch_index}: {e}")
+        continue
 
-# print("Initial pre-processing and saving completed.")
+# Ensure all data is written to disk
+X_reduced_mmap.flush()
+y_mmap.flush()
 
-# Create and train QCNN
-# Constants
-# total_images_loaded = 57195  # Update with the actual total number of images
-# num_components = 64
+# Save the SVD transformers for future use
+with open("svd_transformers.pkl", "wb") as f:
+    pickle.dump(svd_transformers, f)
 
-# # Load memory-mapped arrays
-# X_reduced_mmap = np.memmap(
-#     "X_reduced.dat",
-#     dtype=np.float32,
-#     mode="r",
-#     shape=(total_images_loaded, num_components),
-# )
-# y_mmap = np.memmap(
-#     "y.dat", dtype=np.float32, mode="r", shape=(total_images_loaded, 4)
-# )
+print("Initial pre-processing and saving completed.")
 
-# # Load the SVD transformers
-# with open("svd_transformers.pkl", "rb") as f:
-#     svd_transformers = pickle.load(f)
+Create and train QCNN
+Constants
+total_images_loaded = 57195  # Update with the actual total number of images
+num_components = 64
 
-# # Prepare the reduced dataset
-# X_reduced = []
-# y_reduced = []
+# Load memory-mapped arrays
+X_reduced_mmap = np.memmap(
+    "X_reduced.dat",
+    dtype=np.float32,
+    mode="r",
+    shape=(total_images_loaded, num_components),
+)
+y_mmap = np.memmap(
+    "y.dat", dtype=np.float32, mode="r", shape=(total_images_loaded, 4)
+)
 
-# for i in range(len(svd_transformers)):
-#     start_index = i * 64
-#     end_index = min((i + 1) * 64, total_images_loaded)
-#     if start_index >= total_images_loaded:
-#         break
+# Load the SVD transformers
+with open("svd_transformers.pkl", "rb") as f:
+    svd_transformers = pickle.load(f)
 
-#     X_reduced_batch = X_reduced_mmap[start_index:end_index]
-#     y_batch = y_mmap[start_index:end_index]
+# Prepare the reduced dataset
+X_reduced = []
+y_reduced = []
 
-#     X_reduced.append(X_reduced_batch)
-#     y_reduced.append(y_batch)
+for i in range(len(svd_transformers)):
+    start_index = i * 64
+    end_index = min((i + 1) * 64, total_images_loaded)
+    if start_index >= total_images_loaded:
+        break
 
-# X_reduced = np.vstack(X_reduced)
-# y_reduced = np.vstack(y_reduced)
+    X_reduced_batch = X_reduced_mmap[start_index:end_index]
+    y_batch = y_mmap[start_index:end_index]
 
-# # Convert one-hot encoded labels to 1D array of class labels
-# y_reduced_1d = np.argmax(y_reduced, axis=1)
+    X_reduced.append(X_reduced_batch)
+    y_reduced.append(y_batch)
 
-# # Split the data into training and testing sets
-# X_train, X_test, y_train, y_test = train_test_split(
-#     X_reduced, y_reduced_1d, test_size=0.2, random_state=42
-# )
+X_reduced = np.vstack(X_reduced)
+y_reduced = np.vstack(y_reduced)
+
+# Convert one-hot encoded labels to 1D array of class labels
+y_reduced_1d = np.argmax(y_reduced, axis=1)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X_reduced, y_reduced_1d, test_size=0.2, random_state=42
+)
 
 # Define the quantum device
 n_qubits = 4
