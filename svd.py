@@ -15,7 +15,8 @@ class SVD:
     ):
         self.input = input
         self.output = output
-        self.processed = Preprocessing(input, output, batch_size)
+        self.batch_size = batch_size
+        self.processed = None
         self.num_components = num_components
         self.reduced_batch_size = None
         self.svds = None
@@ -81,6 +82,7 @@ class SVD:
 
     def svd(self):
         self.svds = []
+        self.processed = Preprocessing(self.input, self.output, self.batch_size)
         for self.reduced_batch_size, batch in enumerate(
             self.processed.load_images()
         ):

@@ -88,6 +88,7 @@ def main():
 
     svd = SVD(input, output, 64, 95)
     svd.svd()
+    breakpoint()
     X_train, X_test, y_train, y_test = svd.get_dataset()
 
     qcnn = qcnn_model(svd.num_components)
@@ -127,6 +128,7 @@ def main():
 
     loss, accuracy = qcnn_model.evaluate(X_test_expanded, y_test_one_hot)
     print(f"Test accuracy: {accuracy}")
+    print(f"Test loss: {loss}")
 
     # Save the model
     qcnn_model.save("qcnn_model.h5")
@@ -139,6 +141,7 @@ def main():
     plt.ylabel("Accuracy")
     plt.legend()
     plt.show()
+
 
 if __name__ == "__main__":
     main()
