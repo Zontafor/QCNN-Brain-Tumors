@@ -82,7 +82,7 @@ class SVD:
     def svd(self):
         self.svds = []
         for self.reduced_batch_size, batch in enumerate(
-            self.processing.load_images()
+            self.processed.load_images()
         ):
             # Flatten the batch of images
             X_batch = batch.reshape(batch.shape[0], -1)
