@@ -157,8 +157,8 @@ with open("svd_transformers.pkl", "wb") as f:
 
 print("Initial pre-processing and saving completed.")
 
-Create and train QCNN
-Constants
+# Create and train QCNN
+# Constants
 total_images_loaded = 57195  # Update with the actual total number of images
 num_components = 64
 
