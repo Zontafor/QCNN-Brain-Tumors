@@ -83,7 +83,7 @@ def qcnn_model(input_shape):
 
 
 def main():
-    input = "BraTS2020_training_data/content"
+    input = "archive/BraTS2020_training_data/content/data"
     output = "Outputs"
 
     svd = SVD(input, output, 64, 95)

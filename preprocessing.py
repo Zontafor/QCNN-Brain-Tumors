@@ -29,20 +29,18 @@ class Preprocessing:
     def load_images(self):
         images = []
         self._check_directories()
-        for folder in os.listdir(self.input):
-            path = os.path.join(self.input, folder)
-            if os.path.isdir(path):
-                for file in glob.glob(os.path.join(path, "*.h5")):
-                    try:
-                        with h5py.File(file, "r") as f:
-                            data = f["image"][()]
-                            images.append(data)
-                            self.total_images_loaded += 1
-                            if len(images) >= self.batch_size:
-                                yield np.array(images, dtype=np.float32)
-                                images = []
-                    except Exception as e:
-                        raise Exception(f"Error loading image: {file} - {e}")
+        if os.path.isdir(self.input):
+            for file in glob.glob(os.path.join(self.input, "*.h5")):
+                try:
+                    with h5py.File(file, "r") as f:
+                        data = f["image"][()]
+                        images.append(data)
+                        self.total_images_loaded += 1
+                        if len(images) >= self.batch_size:
+                            yield np.array(images, dtype=np.float32)
+                            images = []
+                except Exception as e:
+                    raise Exception(f"Error loading image: {file} - {e}")
         if images:
             yield np.array(images, dtype=np.float32)
         self._check_image_count()
