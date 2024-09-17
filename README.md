@@ -2,7 +2,7 @@
 Important Information
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-This project is an independent research project for UC Riverside's Quantum Computing Course (2024) and provided as an example for MITRE's Quantum Software Course (2024).
+This project began as an independent research project for UC Riverside's Quantum Computing Course (2024) and was provided as an example for MITRE's Quantum Software Course (2024). NEXQ, Inc. has purchased this project with total ownership.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 [About the Dataset]([url](https://www.kaggle.com/datasets/awsaf49/brats2020-training-data))
